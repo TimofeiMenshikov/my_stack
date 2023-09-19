@@ -7,7 +7,8 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 {
 	unsigned int return_code = stack_verificator(stk_ptr);
 
-	printf("stack stk\n");
+	printf("stack stk [%p]\n", stk_ptr);
+
 
 	if (return_code != 0)
 	{
