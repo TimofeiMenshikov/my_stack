@@ -5,6 +5,8 @@
 #include "include/print.h"
 
 
+
+
 unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 {
 	unsigned int return_code = stack_verificator(stk_ptr);
@@ -53,9 +55,9 @@ unsigned int stack_pop(struct Stack* stk_ptr, elem_t* value_ptr)
 		return INVALID_STACK_SIZE;
 	}
 
-	value_ptr* = data[stk_ptr->size];
+	*value_ptr = stk_ptr->data[stk_ptr->size];
 
-	data[stk_ptr->size] = -1;
+	stk_ptr->data[stk_ptr->size - 1] = POISON_VALUE;
 
 	stk_ptr->size--;
 
@@ -67,7 +69,10 @@ enum error_code stack_init(struct Stack* stk_ptr, const ssize_t start_size)
 
 	printf("start stack init\n");
 
-	assert(start_size >= 0);
+	if (start_size < 0)
+	{
+		return INVALID_STACK_CAPACITY;
+	}
 
 	stk_ptr->capacity = start_size;
 
@@ -77,11 +82,7 @@ enum error_code stack_init(struct Stack* stk_ptr, const ssize_t start_size)
 
 	stk_ptr->size = 0;
 
-	stk_ptr->stk_info.init_line = __LINE__;
-
-	stk_ptr->stk_info.init_file = __FILE__;
-
-	stk_ptr->stk_info.init_func = __func__;
+	get_stack_init_info();
 
 	return NO_ERROR;
 }
