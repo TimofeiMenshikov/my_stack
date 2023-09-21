@@ -3,7 +3,7 @@
 
 typedef int elem_t;
 
-const elem_t POISON_VALUE = -1;
+const elem_t POISON_VALUE = 0;
 
 // define работает со стеком
 #define get_stack_call_info()          \
@@ -25,7 +25,9 @@ enum error_code
 	STACK_DATA_IS_NULL = 2,
 	INVALID_STACK_SIZE = 4,
 	INVALID_STACK_CAPACITY = 8,
-	STACK_SIZE_LARGER_THAN_CAPACITY = 16
+	STACK_SIZE_LARGER_THAN_CAPACITY = 16,
+	UNABLE_TO_INCREASE_STACK = 32,
+	UNABLE_TO_DECREASE_STACK = 64
 };
 
 struct Stack_info
@@ -49,13 +51,17 @@ struct Stack
 
 unsigned int stack_verificator(const struct Stack* const stk_ptr);
 
-enum error_code stack_init(struct Stack* stk_ptr, const ssize_t start_size);
+enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size);
+
+unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr);
+
+unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_ptr);
 
 unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value);
 
 enum error_code stack_dtor(struct Stack* stk_ptr);
 
-unsigned int stack_pop(struct Stack* stk_ptr, elem_t* value_ptr);
+unsigned int stack_pop(struct Stack* stk_ptr, elem_t* const value_ptr);
 
 
 
