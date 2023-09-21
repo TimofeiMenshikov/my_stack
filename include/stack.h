@@ -33,11 +33,15 @@ struct Stack
 	struct Stack_info stk_info;
 };
 
+unsigned int stack_verificator(const struct Stack* const stk_ptr);
+
 enum error_code stack_init(struct Stack* stk_ptr, const ssize_t start_size);
+
+unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value);
 
 enum error_code stack_dtor(struct Stack* stk_ptr);
 
-unsigned int stack_verificator(const struct Stack* const stk_ptr);
+
 
 #endif /* STACK_H */
 

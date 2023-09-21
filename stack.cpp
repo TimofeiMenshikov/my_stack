@@ -2,8 +2,65 @@
 #include <malloc.h>
 #include <assert.h>
 #include "include/stack.h"
+#include "include/print.h"
 
 
+unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
+{
+	unsigned int return_code = stack_verificator(stk_ptr);
+
+	if (return_code != 0)
+	{
+		printf("unable to push, invalid stack\n");
+
+		print_error(return_code);
+
+		return return_code;
+	}
+
+	if (stk_ptr->size == stk_ptr->capacity)
+	{
+		printf("unable to push, stack size = stack capacity\n");
+
+		return STACK_SIZE_LARGER_THAN_CAPACITY;
+	}
+
+	stk_ptr->data[stk_ptr->size] = value;
+
+	stk_ptr->size++;
+
+	return NO_ERROR;
+}
+
+
+unsigned int stack_pop(struct Stack* stk_ptr, elem_t* value_ptr)
+{
+	unsigned int return_code = stack_verificator(stk_ptr);
+
+	if (return_code != 0)
+	{
+		printf("unable to pop, invalid stack\n");
+
+		print_error(return_code);
+
+		return return_code;
+	}
+
+	if (stk_ptr->size == 0)
+	{
+		printf("unable to pop, empty stack\n");
+
+		return INVALID_STACK_SIZE;
+	}
+
+	value_ptr* = data[stk_ptr->size];
+
+	data[stk_ptr->size] = -1;
+
+	stk_ptr->size--;
+
+	return NO_ERROR;
+}
 
 enum error_code stack_init(struct Stack* stk_ptr, const ssize_t start_size)
 {

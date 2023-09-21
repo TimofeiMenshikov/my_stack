@@ -21,11 +21,15 @@ int main()
 
 	print_error(error_code);
 
-	stk.size = 3;
+	print_stack(&stk, stack_size);
 
-	print_stack(&stk, 10);
+	for (ssize_t push_number = 0; push_number < stack_size + 1; push_number++)
+	{
+		stack_push(&stk, push_number);
+		print_data(&stk, stack_size);
+	}
 
+	
+	
 	stack_dtor(&stk);
-
-	print_stack(&stk, 10);
 }
