@@ -5,19 +5,11 @@
 
 unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
-	unsigned int return_code = stack_verificator(stk_ptr);
+	
 
 	printf("stack stk [%p]\n", stk_ptr);
 
 
-	if (return_code != 0)
-	{
-		printf("stack is not work correct\n");
-
-		print_error(return_code);
-
-		return return_code;
-	}
 
 	printf("{\n");
 	printf("\tstack information\n");
@@ -41,28 +33,40 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 	printf("\tsize = %zd\n", stk_ptr->size);
 	printf("\tcapacity = %zd\n", stk_ptr->capacity);
 
-	print_data(stk_ptr, print_poison_data_count);
-
-
+	unsigned int return_code = print_data(stk_ptr, print_poison_data_count);
 
 	printf("}\n");
 
-	return NO_ERROR;
+	return return_code;
 }
 
 
 
 unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
+	unsigned int return_code = stack_verificator(stk_ptr);
+
+
+	if (return_code != 0)
+	{
+		printf("stack is not work correct\n");
+
+		print_error(return_code);
+
+		return return_code;
+	}
+
+
 	printf("\tdata [%p]\n", stk_ptr->data);
 	printf("\t{\n");
+
 
 	if (print_poison_data_count > (stk_ptr->capacity - stk_ptr->size)) // print_poison_data_count - сколько элементов, не находящихся в стеке нужно вывести. Если таких элементов меньше, то выводится весь массив
 	{
 		print_poison_data_count = stk_ptr->capacity - stk_ptr->size;
 	}
 
-	assert((print_poison_data_count + stk_ptr->size) >= stk_ptr->capacity);
+	assert((print_poison_data_count + stk_ptr->size) <= stk_ptr->capacity);
 
 	for (ssize_t element_number = 0; element_number < stk_ptr->size; element_number++)
 	{
@@ -101,6 +105,9 @@ unsigned int print_error(unsigned int error_code)
 
 	if ((error_code & STACK_SIZE_LARGER_THAN_CAPACITY)   != 0) printf("stack size is larger than stack capacity\n");
 
+	if ((error_code & UNABLE_TO_INCREASE_STACK)          != 0) printf("unable to increase stack\n");
+
+	if ((error_code & UNABLE_TO_DECREASE_STACK)   		 != 0) printf("unable to decrease stack\n");
 
 	return error_code;
 }

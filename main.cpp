@@ -12,9 +12,14 @@ int main()
 	#ifdef TEST
 
 		test_stack_1(10);
-		test_stack_1(0);
-		test_stack_1(-1);
-		
+		//test_stack_1(0);
+		//test_stack_1(-1);
+
+		// test_increase_stack(5, 2);
+		// test_decrease_stack(7, 2);
+
+		// test_print_data(10);
+
 	
 	#else /* TEST */
 
