@@ -7,4 +7,6 @@ unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease
 
 unsigned int test_print_data(const ssize_t stack_size);
 
+unsigned int test_alloc_data();
+
 #endif /* TEST_H */

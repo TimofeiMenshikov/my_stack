@@ -2,6 +2,7 @@
 #include <assert.h>
 #include "include/print.h"
 #include "include/stack.h"
+#include "include/canary.h"
 
 unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
@@ -30,8 +31,16 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 	printf("\t}\n");
 
 
-	printf("\tsize = %zd\n", stk_ptr->size);
+	printf("\tsize     = %zd\n", stk_ptr->size);
 	printf("\tcapacity = %zd\n", stk_ptr->capacity);
+
+	#ifdef CANARY_PROTECTION
+
+	printf("\tstack canary left  = %llu\n", stk_ptr->left_canary);   //работает только с unsigned long long
+	printf("\tstack canary right = %llu\n", stk_ptr->right_canary);   //работает только с unsigned long long
+
+	#endif /* CANARY_PROTECTION */ 
+
 
 	unsigned int return_code = print_data(stk_ptr, print_poison_data_count);
 
@@ -60,6 +69,13 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 	printf("\tdata [%p]\n", stk_ptr->data);
 	printf("\t{\n");
 
+	#ifdef CANARY_PROTECTION
+
+		printf("\t\tleft canary:  %llu\n", *(get_left_canary_ptr(stk_ptr->data)));      						// работает только с unsigned long long
+		printf("\t\tright canary: %llu\n", *(get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity)));		// работает только с unsigned long long
+
+	#endif /* CANARY_PROTECTION */
+
 
 	if (print_poison_data_count > (stk_ptr->capacity - stk_ptr->size)) // print_poison_data_count - сколько элементов, не находящихся в стеке нужно вывести. Если таких элементов меньше, то выводится весь массив
 	{
@@ -77,6 +93,8 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 	{
 		printf("\t\t [%zd] = %d\n", element_number, stk_ptr->data[element_number]);       // %d работает, если typedef int !!!!!!!!!!!!!!!!!!!!!!!
 	}
+
+
 
 	printf("\t}\n");
 
@@ -108,6 +126,19 @@ unsigned int print_error(unsigned int error_code)
 	if ((error_code & UNABLE_TO_INCREASE_STACK)          != 0) printf("unable to increase stack\n");
 
 	if ((error_code & UNABLE_TO_DECREASE_STACK)   		 != 0) printf("unable to decrease stack\n");
+
+	#ifdef CANARY_PROTECTION
+
+		if ((error_code & LEFT_CANARY_DATA_DIED)   != 0) printf("left canary in data died\n");
+
+		if ((error_code & RIGHT_CANARY_DATA_DIED)  != 0) printf("right canary in data died\n");
+
+		if ((error_code & LEFT_CANARY_STACK_DIED)  != 0) printf("left canary in stack died\n");
+
+		if ((error_code & RIGHT_CANARY_STACK_DIED) != 0) printf("right canary in stack died\n");
+
+	#endif /* CANARY_PROTECTION */
+
 
 	return error_code;
 }

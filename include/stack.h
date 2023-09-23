@@ -2,6 +2,10 @@
 #define STACK_H
 
 typedef int elem_t;
+typedef unsigned long long canary_t;
+
+
+
 
 const elem_t POISON_VALUE = 0;
 
@@ -28,6 +32,15 @@ enum error_code
 	STACK_SIZE_LARGER_THAN_CAPACITY = 16,
 	UNABLE_TO_INCREASE_STACK = 32,
 	UNABLE_TO_DECREASE_STACK = 64
+
+	#ifdef CANARY_PROTECTION
+	,
+	LEFT_CANARY_DATA_DIED = 128,
+	RIGHT_CANARY_DATA_DIED = 256,
+	LEFT_CANARY_STACK_DIED = 512,
+	RIGHT_CANARY_STACK_DIED = 1024
+
+	#endif /* CANARY_PROTECTION */
 };
 
 struct Stack_info
@@ -43,10 +56,18 @@ struct Stack_info
 
 struct Stack
 {
+	#ifdef CANARY_PROTECTION
+		canary_t left_canary;
+	#endif /* CANARY_PROTECTION */
+
 	elem_t* data;
 	ssize_t size;
 	ssize_t capacity;
 	struct Stack_info stk_info;
+
+	#ifdef CANARY_PROTECTION
+		canary_t right_canary;
+	#endif /* CANARY_PROTECTION */
 };
 
 unsigned int stack_verificator(const struct Stack* const stk_ptr);
@@ -63,6 +84,7 @@ enum error_code stack_dtor(struct Stack* stk_ptr);
 
 unsigned int stack_pop(struct Stack* stk_ptr, elem_t* const value_ptr);
 
+ssize_t get_stack_decrease_lag(const ssize_t capacity);
 
 
 #endif /* STACK_H */

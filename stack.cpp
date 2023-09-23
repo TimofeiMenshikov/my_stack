@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "include/stack.h"
 #include "include/print.h"
+#include "include/canary.h"
 
 
 unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr)
@@ -10,7 +11,9 @@ unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_
 
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity * increase_coef);
+	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity * increase_coef);
+
+	stk_ptr->data = alloc_data(stk_ptr->capacity * increase_coef, stk_ptr->data);
 
 	if (stk_ptr->data == NULL)
 	{
@@ -43,7 +46,9 @@ unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_
 	
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity / decrease_coef);
+	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity / decrease_coef);
+
+	stk_ptr->data = alloc_data(sizeof(elem_t) * stk_ptr->capacity / decrease_coef, stk_ptr->data);
 
 	if ((stk_ptr->data) == NULL)
 	{
@@ -76,7 +81,7 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 
 	if (stk_ptr->size == stk_ptr->capacity)
 	{
-		unsigned int return_code = increase_stack(increase_coef, stk_ptr);
+		return_code |= increase_stack(increase_coef, stk_ptr);
 
 		if (return_code != NO_ERROR)
 		{
@@ -116,13 +121,29 @@ unsigned int stack_pop(struct Stack* const stk_ptr, elem_t* const value_ptr)
 		return INVALID_STACK_SIZE;
 	}
 
+	ssize_t stack_decrease_lag = get_stack_decrease_lag(stk_ptr->capacity);
+
+	printf("stack size is %zd\n", stk_ptr->size);
+	printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag);
+
+	if ((stk_ptr->capacity - get_stack_decrease_lag(stk_ptr->capacity)) > stk_ptr->size)
+	{
+		return_code |= decrease_stack(decrease_coef, stk_ptr);
+
+		if (return_code != NO_ERROR)
+		{
+			printf("unable to decrease stack, stack works with the previos size\n");
+		}
+	}
+
+
 	*value_ptr = stk_ptr->data[stk_ptr->size];
 
 	stk_ptr->data[stk_ptr->size - 1] = POISON_VALUE;
 
 	stk_ptr->size--;
 
-	return NO_ERROR;
+	return return_code;
 }
 
 
@@ -136,9 +157,19 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 		return INVALID_STACK_CAPACITY;
 	}
 
+	#ifdef CANARY_PROTECTION
+
+		stk_ptr->left_canary = CANARY_LEFT_CONSTANT;
+
+		stk_ptr->right_canary = CANARY_RIGHT_CONSTANT;
+
+	#endif /* CANARY_PROTECTION */
+
 	stk_ptr->capacity = start_size;
 
-	stk_ptr->data = (elem_t*) calloc(stk_ptr->capacity, sizeof(elem_t));
+	//stk_ptr->data = (elem_t*) calloc(stk_ptr->capacity, sizeof(elem_t));
+
+	stk_ptr->data = init_data(stk_ptr->capacity);
 
 	printf("calloc data\n");
 
@@ -157,7 +188,7 @@ enum error_code stack_dtor(struct Stack* stk_ptr)
 
 	printf("nulled size and capacity\n");
 
-	free(stk_ptr->data);
+	free_data(stk_ptr->data);
 
 	stk_ptr->data = 0;
 
@@ -204,5 +235,29 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 		return_code |= STACK_SIZE_LARGER_THAN_CAPACITY;
 	}
 
+	#ifdef CANARY_PROTECTION
+
+		if (stk_ptr->left_canary != CANARY_LEFT_CONSTANT)
+		{
+			return_code |= LEFT_CANARY_STACK_DIED;
+		}
+
+		if (stk_ptr->right_canary != CANARY_RIGHT_CONSTANT)
+		{
+			return_code |= RIGHT_CANARY_STACK_DIED;
+		}
+
+	#endif /* CANARY_PROTECTION */
+
 	return return_code;
+}
+
+
+ssize_t get_stack_decrease_lag(const ssize_t capacity)
+{
+	const ssize_t lag_constant = 2;
+
+	assert(lag_constant > 0);
+
+	return capacity / lag_constant;
 }

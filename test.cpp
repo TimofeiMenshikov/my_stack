@@ -3,6 +3,7 @@
 #include "include/stack.h"
 #include "include/print.h"
 #include "include/test.h"
+#include "include/canary.h"
 
 
 #define start_test()         								   \
@@ -31,7 +32,7 @@ unsigned int test_stack_1(const ssize_t stack_size)
 {
 	start_test();
 
-	for (ssize_t push_number = 0; push_number < stack_size * 5; push_number++)
+	for (ssize_t push_number = 0; push_number < stack_size; push_number++)
 	{
 		stack_push(&stk, push_number);
 		print_stack(&stk, stk.capacity);
@@ -65,6 +66,8 @@ unsigned int test_print_data(const ssize_t stack_size)
 		print_data(&stk, print_poison_data_count);
 	}
 
+	stack_dtor(&stk);
+
 	return NO_ERROR;
 }
 
@@ -77,7 +80,7 @@ unsigned int test_increase_stack(const ssize_t stack_size, const size_t increase
 
 	print_stack(&stk, stk.capacity);
 
-
+	stack_dtor(&stk);
 
 	return NO_ERROR;
 }
@@ -93,6 +96,36 @@ unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease
 
 	print_stack(&stk, stk.capacity);
 
+	stack_dtor(&stk);
 
 	return NO_ERROR;
 } 
+
+
+unsigned int test_alloc_data()
+{
+	ssize_t capacity = 5;
+
+	elem_t* data = init_data(capacity);
+
+
+	#ifdef CANARY_PROTECTION
+
+		printf("left canary: %llu\n", *(get_left_canary_ptr(data)));
+
+		printf("right canary: %llu\n", *(get_right_canary_ptr(data, capacity)));	
+
+	#endif /* CANARY_PROTECTION */
+
+	for (ssize_t n_elem = 0; n_elem < capacity; n_elem++)
+	{
+		printf("element %zu [%p]: %d\n", n_elem, data + n_elem, data[n_elem]);
+	}
+
+	free_data(data);
+
+	printf("data is free\n");
+
+
+	return NO_ERROR;
+}

@@ -6,6 +6,7 @@
 
 const ssize_t stack_size = 10;
 
+
 int main()
 {
 
@@ -15,11 +16,12 @@ int main()
 		//test_stack_1(0);
 		//test_stack_1(-1);
 
-		// test_increase_stack(5, 2);
-		// test_decrease_stack(7, 2);
+		//test_increase_stack(5, 2);
+		//test_decrease_stack(7, 2);
 
-		// test_print_data(10);
+		//test_print_data(10);
 
+		//test_alloc_data();
 	
 	#else /* TEST */
 
