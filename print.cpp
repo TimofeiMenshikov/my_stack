@@ -34,13 +34,21 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 	printf("\tsize     = %zd\n", stk_ptr->size);
 	printf("\tcapacity = %zd\n", stk_ptr->capacity);
 
+	#ifdef HASH_PROTECTION
+
+		printf("\tstack  hash = %llu\n", stk_ptr->hash_stack);      // работает только с unsigned long long 
+		printf("\tdata   hash = %llu\n", stk_ptr->hash_data); // работает только с unsigned long long 
+
+	#endif /* HASH_PROTECTION */
+
 	#ifdef CANARY_PROTECTION
 
-	printf("\tstack canary left  = %llu\n", stk_ptr->left_canary);   //работает только с unsigned long long
-	printf("\tstack canary right = %llu\n", stk_ptr->right_canary);   //работает только с unsigned long long
+		printf("\tstack canary left  = %llu\n", stk_ptr->left_canary);   //работает только с unsigned long long
+		printf("\tstack canary right = %llu\n", stk_ptr->right_canary);   //работает только с unsigned long long
 
 	#endif /* CANARY_PROTECTION */ 
 
+	printf("\tlast popped value = %d\n", stk_ptr->last_popped_value); // работает только с int 
 
 	unsigned int return_code = print_data(stk_ptr, print_poison_data_count);
 

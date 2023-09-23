@@ -3,6 +3,7 @@
 
 typedef int elem_t;
 typedef unsigned long long canary_t;
+typedef unsigned long long hash_t;
 
 
 
@@ -63,7 +64,15 @@ struct Stack
 	elem_t* data;
 	ssize_t size;
 	ssize_t capacity;
+
+	elem_t last_popped_value; 
+
 	struct Stack_info stk_info;
+
+	#ifdef HASH_PROTECTION 
+		hash_t hash_stack;
+		hash_t hash_data;
+	#endif /* HASH_PROTECTION */
 
 	#ifdef CANARY_PROTECTION
 		canary_t right_canary;
@@ -82,7 +91,7 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value);
 
 enum error_code stack_dtor(struct Stack* stk_ptr);
 
-unsigned int stack_pop(struct Stack* stk_ptr, elem_t* const value_ptr);
+unsigned int stack_pop(struct Stack* stk_ptr);
 
 ssize_t get_stack_decrease_lag(const ssize_t capacity);
 

@@ -32,19 +32,17 @@ unsigned int test_stack_1(const ssize_t stack_size)
 {
 	start_test();
 
-	for (ssize_t push_number = 0; push_number < stack_size; push_number++)
+	for (ssize_t push_number = 0; push_number < stack_size * 3; push_number++)
 	{
 		stack_push(&stk, push_number);
 		print_stack(&stk, stk.capacity);
 	}
 
-	elem_t pop_value = POISON_VALUE;
-
 	for (ssize_t pop_number = stack_size - 1; pop_number >= 0; pop_number--)
 	{
-		stack_pop(&stk, &pop_value);
+		stack_pop(&stk);
 		print_stack(&stk, stk.capacity);
-		printf("popped number is %d\n", pop_value); // %d только для int 
+		printf("popped number is %d\n", stk.last_popped_value); // %d только для int 
 	}
 
 	stack_dtor(&stk);

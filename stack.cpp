@@ -4,6 +4,8 @@
 #include "include/stack.h"
 #include "include/print.h"
 #include "include/canary.h"
+#include "include/hash.h"
+
 
 
 unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr)
@@ -13,7 +15,7 @@ unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_
 
 	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity * increase_coef);
 
-	stk_ptr->data = alloc_data(stk_ptr->capacity * increase_coef, stk_ptr->data);
+	stk_ptr->data = alloc_data(stk_ptr->capacity, stk_ptr->capacity * increase_coef, stk_ptr->data);
 
 	if (stk_ptr->data == NULL)
 	{
@@ -48,7 +50,7 @@ unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_
 
 	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity / decrease_coef);
 
-	stk_ptr->data = alloc_data(sizeof(elem_t) * stk_ptr->capacity / decrease_coef, stk_ptr->data);
+	stk_ptr->data = alloc_data(stk_ptr->capacity, stk_ptr->capacity / decrease_coef, stk_ptr->data);
 
 	if ((stk_ptr->data) == NULL)
 	{
@@ -99,7 +101,7 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 }
 
 
-unsigned int stack_pop(struct Stack* const stk_ptr, elem_t* const value_ptr)
+unsigned int stack_pop(struct Stack* const stk_ptr)
 {
 	const size_t decrease_coef = 2;
 
@@ -136,8 +138,7 @@ unsigned int stack_pop(struct Stack* const stk_ptr, elem_t* const value_ptr)
 		}
 	}
 
-
-	*value_ptr = stk_ptr->data[stk_ptr->size];
+	stk_ptr->last_popped_value = stk_ptr->data[stk_ptr->size - 1];
 
 	stk_ptr->data[stk_ptr->size - 1] = POISON_VALUE;
 
@@ -157,6 +158,8 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 		return INVALID_STACK_CAPACITY;
 	}
 
+	stk_ptr->capacity = start_size;
+
 	#ifdef CANARY_PROTECTION
 
 		stk_ptr->left_canary = CANARY_LEFT_CONSTANT;
@@ -165,9 +168,16 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	#endif /* CANARY_PROTECTION */
 
+	#ifdef HASH_PROTECTION
+
+		stk_ptr->hash_stack = calc_hash_stack(stk_ptr);
+		stk_ptr->hash_data  =  calc_hash_data(stk_ptr); 
+
+	#endif /* HASH_PROTECTION */
+
 	stk_ptr->capacity = start_size;
 
-	//stk_ptr->data = (elem_t*) calloc(stk_ptr->capacity, sizeof(elem_t));
+	stk_ptr->last_popped_value = POISON_VALUE;
 
 	stk_ptr->data = init_data(stk_ptr->capacity);
 
@@ -236,6 +246,16 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 	}
 
 	#ifdef CANARY_PROTECTION
+
+		if (*get_left_canary_ptr(stk_ptr->data)  != CANARY_LEFT_CONSTANT)
+		{
+			return_code |= LEFT_CANARY_DATA_DIED;
+		}
+
+		if (*get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity) != CANARY_RIGHT_CONSTANT)
+		{
+			return_code |= RIGHT_CANARY_DATA_DIED; 
+		}
 
 		if (stk_ptr->left_canary != CANARY_LEFT_CONSTANT)
 		{

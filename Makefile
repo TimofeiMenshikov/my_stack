@@ -1,15 +1,20 @@
 CXXFLAGS =  -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE 
 CXX = g++
-SOURCES = main.cpp stack.cpp print.cpp test.cpp canary.cpp
+SOURCES = main.cpp stack.cpp print.cpp test.cpp canary.cpp hash.cpp
 OBJDIR = object_files
-OBJECTS = $(OBJDIR)/main.o $(OBJDIR)/stack.o $(OBJDIR)/print.o $(OBJDIR)/test.o $(OBJDIR)/canary.o
+OBJECTS = $(OBJDIR)/main.o $(OBJDIR)/stack.o $(OBJDIR)/print.o $(OBJDIR)/test.o $(OBJDIR)/canary.o $(OBJDIR)/hash.o
 
 TEST = True
 
 CANARY_PROTECTION = True
+HASH_PROTECTION = True
 
 ifeq ($(CANARY_PROTECTION), True)
 	CXXFLAGS += -DCANARY_PROTECTION
+endif
+
+ifeq ($(HASH_PROTECTION), True)
+	CXXFLAGS += -DHASH_PROTECTION
 endif
 
 ifeq ($(TEST), True)
