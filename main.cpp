@@ -9,45 +9,25 @@ const ssize_t stack_size = 10;
 
 int main()
 {
+	struct Stack stk;
 
-	#ifdef TEST
+	get_stack_call_info(); 
 
-		test_stack_1(10);
-		//test_stack_1(0);
-		//test_stack_1(-1);
+	stack_init(&stk, stack_size);
 
-		//test_increase_stack(5, 2);
-		//test_decrease_stack(7, 2);
+	printf("stack has been init\n");
 
-		//test_print_data(10);
+	unsigned int error_code = stack_verificator(&stk);
 
-		//test_alloc_data();
-	
-	#else /* TEST */
+	print_error(error_code);
 
-		struct Stack stk;
+	print_stack(&stk, stack_size);
 
-		get_stack_call_info(); 
+	for (ssize_t push_number = 0; push_number < stack_size + 1; push_number++)
+	{
+		stack_push(&stk, push_number);
+		print_data(&stk, stack_size);
+	}
 
-		stack_init(&stk, stack_size);
-
-		printf("stack has been init\n");
-
-		unsigned int error_code = stack_verificator(&stk);
-
-		print_error(error_code);
-
-		print_stack(&stk, stack_size);
-
-		for (ssize_t push_number = 0; push_number < stack_size + 1; push_number++)
-		{
-			stack_push(&stk, push_number);
-			print_data(&stk, stack_size);
-		}
-
-		stack_dtor(&stk);
-
-	#endif /* TEST */
-	
-
+	stack_dtor(&stk);
 }

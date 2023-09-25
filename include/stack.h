@@ -2,11 +2,9 @@
 #define STACK_H
 
 typedef int elem_t;
+#define STACK_PRINTF_SPEC "%d"
 typedef unsigned long long canary_t;
 typedef unsigned long long hash_t;
-
-
-
 
 const elem_t POISON_VALUE = 0;
 
@@ -25,6 +23,8 @@ const elem_t POISON_VALUE = 0;
 
 enum error_code
 {
+	#warning dechimal bad (1 << 2) 0x04
+
 	NO_ERROR = 0,
 	STACK_POINTER_IS_NULL = 1,
 	STACK_DATA_IS_NULL = 2,
@@ -42,6 +42,13 @@ enum error_code
 	RIGHT_CANARY_STACK_DIED = 1024
 
 	#endif /* CANARY_PROTECTION */
+
+	#ifdef HASH_PROTECTION
+	,
+	STACK_HASH_IS_WRONG = 2048,
+	DATA_HASH_IS_WRONG = 4096
+
+	#endif /* HASH_PROTECTION */
 };
 
 struct Stack_info

@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <assert.h>
-#include "include/print.h"
-#include "include/stack.h"
-#include "include/canary.h"
+#include "../include/print.h"
+#include "../include/stack.h"
+#include "../include/canary.h"
+
 
 unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
-	
-
 	printf("stack stk [%p]\n", stk_ptr);
-
-
 
 	printf("{\n");
 	printf("\tstack information\n");
@@ -66,9 +63,9 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 
 	if (return_code != 0)
 	{
-		printf("stack is not work correct\n");
+		PRINT_STACK_ERR("stack is not work correct\n");
 
-		print_error(return_code);
+		print_stack_error(return_code);
 
 		return return_code;
 	}
@@ -99,6 +96,7 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 
 	for (ssize_t element_number = stk_ptr->size; element_number < (print_poison_data_count +  stk_ptr->size); element_number++)
 	{
+		#warning stack type specifier not hardcode
 		printf("\t\t [%zd] = %d\n", element_number, stk_ptr->data[element_number]);       // %d работает, если typedef int !!!!!!!!!!!!!!!!!!!!!!!
 	}
 
@@ -110,8 +108,7 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 }
 
 
-
-unsigned int print_error(unsigned int error_code)
+unsigned int print_stack_error(const unsigned int error_code)
 {
 	if (error_code == NO_ERROR)
 	{
@@ -121,31 +118,40 @@ unsigned int print_error(unsigned int error_code)
 
 	printf("errors:\n");
 
-	if ((error_code & STACK_POINTER_IS_NULL) 			 != 0) printf("stack pointer is NULL\n");
+	if ((error_code & STACK_POINTER_IS_NULL) 			 != 0) PRINT_STACK_ERR("stack pointer is NULL\n");
 
-	if ((error_code & STACK_DATA_IS_NULL)     		     != 0) printf("stack data is NULL\n");
+	if ((error_code & STACK_DATA_IS_NULL)     		     != 0) PRINT_STACK_ERR("stack data is NULL\n");
 
-	if ((error_code & INVALID_STACK_SIZE)      		     != 0) printf("stack size is < 0\n");
+	if ((error_code & INVALID_STACK_SIZE)      		     != 0) PRINT_STACK_ERR("stack size is < 0\n");
 
-	if ((error_code & INVALID_STACK_CAPACITY) 		     != 0) printf("stack capacity is < 0\n");
+	if ((error_code & INVALID_STACK_CAPACITY) 		     != 0) PRINT_STACK_ERR("stack capacity is < 0\n");
 
-	if ((error_code & STACK_SIZE_LARGER_THAN_CAPACITY)   != 0) printf("stack size is larger than stack capacity\n");
+	if ((error_code & STACK_SIZE_LARGER_THAN_CAPACITY)   != 0) PRINT_STACK_ERR("stack size is larger than stack capacity\n");
 
-	if ((error_code & UNABLE_TO_INCREASE_STACK)          != 0) printf("unable to increase stack\n");
+	if ((error_code & UNABLE_TO_INCREASE_STACK)          != 0) PRINT_STACK_ERR("unable to increase stack\n");
 
-	if ((error_code & UNABLE_TO_DECREASE_STACK)   		 != 0) printf("unable to decrease stack\n");
+	if ((error_code & UNABLE_TO_DECREASE_STACK)   		 != 0) PRINT_STACK_ERR("unable to decrease stack\n");
 
 	#ifdef CANARY_PROTECTION
 
-		if ((error_code & LEFT_CANARY_DATA_DIED)   != 0) printf("left canary in data died\n");
+		if ((error_code & LEFT_CANARY_DATA_DIED)         != 0) PRINT_STACK_ERR("left canary in data died\n");
 
-		if ((error_code & RIGHT_CANARY_DATA_DIED)  != 0) printf("right canary in data died\n");
+		if ((error_code & RIGHT_CANARY_DATA_DIED)  		 != 0) PRINT_STACK_ERR("right canary in data died\n");
 
-		if ((error_code & LEFT_CANARY_STACK_DIED)  != 0) printf("left canary in stack died\n");
+		if ((error_code & LEFT_CANARY_STACK_DIED)  		 != 0) PRINT_STACK_ERR("left canary in stack died\n");
 
-		if ((error_code & RIGHT_CANARY_STACK_DIED) != 0) printf("right canary in stack died\n");
+		if ((error_code & RIGHT_CANARY_STACK_DIED) 		 != 0) PRINT_STACK_ERR("right canary in stack died\n");
 
 	#endif /* CANARY_PROTECTION */
+
+	#ifdef HASH_PROTECTION
+
+		if ((error_code & DATA_HASH_IS_WRONG)     		 != 0) PRINT_STACK_ERR("wrong data hash\n");
+
+		if ((error_code & STACK_HASH_IS_WRONG)     		 != 0) PRINT_STACK_ERR("wrong stack hash\n");
+
+
+	#endif /* HASH_PROTECTION */
 
 
 	return error_code;

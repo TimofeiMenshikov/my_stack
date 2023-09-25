@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include "include/stack.h"
 #include "include/print.h"
-#include "include/test.h"
 #include "include/canary.h"
 
 
@@ -15,24 +15,24 @@
 															   \
 	if (init_code != NO_ERROR)								   \
 	{														   \
-		print_error(init_code);								   \
+		print_stack_error(init_code);						   \
 		return init_code;									   \
 	}														   \
 															   \
 															   \
 	unsigned int error_code = stack_verificator(&stk);         \
 															   \
-	print_error(error_code);								   \
+	print_stack_error(error_code);							   \
 															   \
 	print_stack(&stk, stack_size);  						   
 
 
 
-unsigned int test_stack_1(const ssize_t stack_size)
+static unsigned int test_stack(const ssize_t stack_size)
 {
 	start_test();
 
-	for (ssize_t push_number = 0; push_number < stack_size * 3; push_number++)
+	for (ssize_t push_number = 0; push_number < stack_size; push_number++)
 	{
 		stack_push(&stk, push_number);
 		print_stack(&stk, stk.capacity);
@@ -42,7 +42,7 @@ unsigned int test_stack_1(const ssize_t stack_size)
 	{
 		stack_pop(&stk);
 		print_stack(&stk, stk.capacity);
-		printf("popped number is %d\n", stk.last_popped_value); // %d только для int 
+		//printf("popped number is %d\n", stk.last_popped_value); // %d только для int 
 	}
 
 	stack_dtor(&stk);
@@ -53,7 +53,7 @@ unsigned int test_stack_1(const ssize_t stack_size)
 }
 
 
-unsigned int test_print_data(const ssize_t stack_size)
+static unsigned int test_print_data(const ssize_t stack_size)
 {
 	start_test();
 
@@ -70,7 +70,7 @@ unsigned int test_print_data(const ssize_t stack_size)
 }
 
 
-unsigned int test_increase_stack(const ssize_t stack_size, const size_t increase_coef)
+static unsigned int test_increase_stack(const ssize_t stack_size, const size_t increase_coef)
 {
 	start_test();
 
@@ -84,7 +84,7 @@ unsigned int test_increase_stack(const ssize_t stack_size, const size_t increase
 }
 
 
-unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease_coef)
+static unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease_coef)
 {
 	start_test();
 
@@ -100,7 +100,7 @@ unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease
 } 
 
 
-unsigned int test_alloc_data()
+static unsigned int test_alloc_data()
 {
 	ssize_t capacity = 5;
 
@@ -126,4 +126,58 @@ unsigned int test_alloc_data()
 
 
 	return NO_ERROR;
+}
+
+static unsigned int test_print_stack_error(unsigned int max_error_code)
+{
+	for (unsigned int error_code = 0; error_code < max_error_code; error_code++)
+	{
+		printf("error code: %u\n", error_code);
+		print_stack_error(error_code);
+	}
+
+	return NO_ERROR;
+}
+
+
+
+int main(int argc, char* argv[])
+{
+	size_t test_number = 0;
+
+	for (size_t test_number = 1; test_number < argc; test_number++)
+	{
+		if       (strcmp(argv[test_number], "test_stack_1")          == 0)
+		{
+			test_stack(10);
+		}
+		else if (strcmp(argv[test_number], "test_stack_2") 		     == 0)
+		{
+			test_stack(0);
+		}
+		else if (strcmp(argv[test_number], "test_stack_3") 		     == 0)
+		{
+			test_stack(-1);
+		}
+		else if (strcmp(argv[test_number], "test_increase_stack")    == 0)
+		{
+			test_increase_stack(5, 2);
+		}
+		else if (strcmp(argv[test_number], "test_decrease_stack")    == 0)
+		{
+			test_decrease_stack(7, 2);
+		}
+		else if (strcmp(argv[test_number], "test_print_data") 	     == 0)
+		{
+			test_print_data(10);
+		}
+		else if (strcmp(argv[test_number], "test_print_stack_error") == 0)
+		{
+			test_print_stack_error(10);
+		}
+		else if (strcmp(argv[test_number], "test_alloc_data")        == 0)
+		{
+			test_alloc_data();
+		}
+	}
 }

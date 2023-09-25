@@ -4,9 +4,22 @@
 
 #include "stack.h"
 
+#ifdef STACK_DUMP
+	#define PRINT_STACK_ERR(text) fprintf(stderr, "%s\n", text);
+#else /* STACK_DUMP */
+	#define PRINT_STACK_ERR(text) 
+#endif /* STACK_DUMP */
+
+#ifdef STDOUT_DUMP
+	#define STDOUT_PRINT(text) printf("%s\n", text);
+#else /* STDOUT_DUMP */
+	#define STDOUT_PRINT(text) 
+#endif /* STDOUT_DUMP */
+
+
 unsigned int print_stack(const struct Stack* const stk_ptr, ssize_t print_data_count);
 
-unsigned int print_error(unsigned int error_code);
+unsigned int print_stack_error(const unsigned int error_code);
 
 unsigned int print_data(const Stack*  const stk_ptr, ssize_t print_poison_data_count);
 

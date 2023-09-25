@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <assert.h>
-#include "include/stack.h"
-#include "include/print.h"
-#include "include/canary.h"
-#include "include/hash.h"
+#include "../include/stack.h"
+#include "../include/print.h"
+#include "../include/canary.h"
+#include "../include/hash.h"
 
-
+#warning lag constant here and nafig this function
 
 unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr)
 {
@@ -20,7 +20,7 @@ unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_
 	if (stk_ptr->data == NULL)
 	{
 		stk_ptr->data = old_data_ptr;
-		printf("unable to increase stack\n");
+		PRINT_STACK_ERR("unable to increase stack\n");
 
 		return UNABLE_TO_INCREASE_STACK;
 	}
@@ -38,10 +38,9 @@ unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_
 
 unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_ptr)
 {
-
 	if (stk_ptr->capacity / decrease_coef < stk_ptr->size)
 	{
-		printf("unable to decrease stack, size bigger than capacity to be decreased\n");
+		PRINT_STACK_ERR("unable to decrease stack, size bigger than capacity to be decreased\n");
 
 		return UNABLE_TO_DECREASE_STACK | STACK_SIZE_LARGER_THAN_CAPACITY;
 	}
@@ -55,7 +54,7 @@ unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_
 	if ((stk_ptr->data) == NULL)
 	{
 		stk_ptr->data = old_data_ptr;
-		printf("unable to decrease stack\n");
+		PRINT_STACK_ERR("unable to decrease stack\n");
 
 		return UNABLE_TO_DECREASE_STACK;
 	}	
@@ -74,9 +73,9 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 
 	if (return_code != 0)
 	{
-		printf("unable to push, invalid stack\n");
+		PRINT_STACK_ERR("unable to push, invalid stack\n");
 
-		print_error(return_code);
+		print_stack_error(return_code);
 
 		return return_code;
 	}
@@ -87,7 +86,7 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 
 		if (return_code != NO_ERROR)
 		{
-			print_error(return_code);
+			print_stack_error(return_code);
 			return return_code;
 		}
 
@@ -109,16 +108,16 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 
 	if (return_code != 0)
 	{
-		printf("unable to pop, invalid stack\n");
+		PRINT_STACK_ERR("unable to pop, invalid stack\n");
 
-		print_error(return_code);
+		print_stack_error(return_code);
 
 		return return_code;
 	}
 
 	if (stk_ptr->size == 0)
 	{
-		printf("unable to pop, empty stack\n");
+		PRINT_STACK_ERR("unable to pop, empty stack\n");
 
 		return INVALID_STACK_SIZE;
 	}
@@ -128,13 +127,14 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 	printf("stack size is %zd\n", stk_ptr->size);
 	printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag);
 
+	#warning lag works wrong way
 	if ((stk_ptr->capacity - get_stack_decrease_lag(stk_ptr->capacity)) > stk_ptr->size)
 	{
 		return_code |= decrease_stack(decrease_coef, stk_ptr);
 
 		if (return_code != NO_ERROR)
 		{
-			printf("unable to decrease stack, stack works with the previos size\n");
+			PRINT_STACK_ERR("unable to decrease stack, stack works with the previos size\n");
 		}
 	}
 
@@ -170,8 +170,10 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	#ifdef HASH_PROTECTION
 
-		stk_ptr->hash_stack = calc_hash_stack(stk_ptr);
-		stk_ptr->hash_data  =  calc_hash_data(stk_ptr); 
+
+		stk_ptr->hash_stack =  calc_hash_stack(*stk_ptr);
+
+		stk_ptr->hash_data  =  calc_hash_data(*stk_ptr);
 
 	#endif /* HASH_PROTECTION */
 
@@ -196,6 +198,7 @@ enum error_code stack_dtor(struct Stack* stk_ptr)
 	stk_ptr->capacity = -1;
 	stk_ptr->size = -1;
 
+	#warning do not always pooop in user's console
 	printf("nulled size and capacity\n");
 
 	free_data(stk_ptr->data);
@@ -225,49 +228,34 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 		return return_code;
 	}
 
-	if (stk_ptr->data == NULL)
-	{
-		return_code |= STACK_DATA_IS_NULL;
-	}
+	if (stk_ptr->data == NULL)    			return_code |= STACK_DATA_IS_NULL;
 
-	if (stk_ptr->size < 0)
-	{
-		return_code |= INVALID_STACK_SIZE;
-	}
+	if (stk_ptr->size < 0) 					return_code |= INVALID_STACK_SIZE;
 
-	if (stk_ptr->capacity < 0)
-	{
-		return_code |= INVALID_STACK_CAPACITY;
-	}
+	if (stk_ptr->capacity < 0)              return_code |= INVALID_STACK_CAPACITY;
 
-	if (stk_ptr->size > stk_ptr->capacity)
-	{
-		return_code |= STACK_SIZE_LARGER_THAN_CAPACITY;
-	}
+	if (stk_ptr->size > stk_ptr->capacity)  return_code |= STACK_SIZE_LARGER_THAN_CAPACITY;
+	
 
 	#ifdef CANARY_PROTECTION
 
-		if (*get_left_canary_ptr(stk_ptr->data)  != CANARY_LEFT_CONSTANT)
-		{
-			return_code |= LEFT_CANARY_DATA_DIED;
-		}
+		if (*get_left_canary_ptr(stk_ptr->data)  != CANARY_LEFT_CONSTANT)  					  return_code |= LEFT_CANARY_DATA_DIED;
 
-		if (*get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity) != CANARY_RIGHT_CONSTANT)
-		{
-			return_code |= RIGHT_CANARY_DATA_DIED; 
-		}
+		if (*get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity) != CANARY_RIGHT_CONSTANT) return_code |= RIGHT_CANARY_DATA_DIED; 
 
-		if (stk_ptr->left_canary != CANARY_LEFT_CONSTANT)
-		{
-			return_code |= LEFT_CANARY_STACK_DIED;
-		}
+		if (stk_ptr->left_canary != CANARY_LEFT_CONSTANT)        							  return_code |= LEFT_CANARY_STACK_DIED;
 
-		if (stk_ptr->right_canary != CANARY_RIGHT_CONSTANT)
-		{
-			return_code |= RIGHT_CANARY_STACK_DIED;
-		}
+		if (stk_ptr->right_canary != CANARY_RIGHT_CONSTANT)    								  return_code |= RIGHT_CANARY_STACK_DIED;
 
 	#endif /* CANARY_PROTECTION */
+
+	#ifdef HASH_PROTECTION
+
+		if (stk_ptr->hash_stack != calc_hash_stack(*stk_ptr))  return_code |= STACK_HASH_IS_WRONG;
+
+		if (stk_ptr->hash_data  != calc_hash_data(*stk_ptr))   return_code |= DATA_HASH_IS_WRONG;
+
+	#endif /* HASH_PROTECTION */
 
 	return return_code;
 }

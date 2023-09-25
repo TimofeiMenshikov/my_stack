@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <assert.h>
-#include "include/canary.h"
-#include "include/stack.h"
+#include "../include/canary.h"
+#include "../include/stack.h"
 
 
 #ifdef CANARY_PROTECTION
 
-	canary_t* get_left_canary_ptr(const elem_t* const data)
+	canary_t* get_left_canary_ptr(elem_t* const data)
 	{
 		canary_t* const canary_left_ptr = (canary_t*)data - 1;
 		return canary_left_ptr;
 	}
 
-	canary_t* get_right_canary_ptr(const elem_t* const data, ssize_t capacity)
+	canary_t* get_right_canary_ptr(elem_t* const data, ssize_t capacity)
 	{
 		canary_t* const canary_right_ptr = (canary_t*)((elem_t*)data + capacity);
 		return canary_right_ptr;
@@ -97,6 +97,7 @@ elem_t* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_
 }
 
 
+#warning init_data is too generic name. Stack should not depend on canaries with them off
 elem_t* init_data(const ssize_t capacity)
 {
 	elem_t* data = NULL;
