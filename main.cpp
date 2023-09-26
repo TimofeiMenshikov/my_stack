@@ -15,7 +15,7 @@ int main()
 
 	stack_init(&stk, stack_size);
 
-	printf("stack has been init\n");
+	STDOUT_PRINT(printf("stack has been init\n"));
 
 	unsigned int error_code = stack_verificator(&stk);
 

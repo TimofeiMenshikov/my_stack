@@ -4,6 +4,7 @@
 #include "include/stack.h"
 #include "include/print.h"
 #include "include/canary.h"
+#include "include/hash.h"
 
 
 #define start_test()         								   \
@@ -42,12 +43,12 @@ static unsigned int test_stack(const ssize_t stack_size)
 	{
 		stack_pop(&stk);
 		print_stack(&stk, stk.capacity);
-		//printf("popped number is %d\n", stk.last_popped_value); // %d только для int 
+		STDOUT_PRINT(printf("popped number is %d\n", stk.last_popped_value)); // %d только для int 
 	}
 
 	stack_dtor(&stk);
 
-	printf("test stack 1 has been destroyed\n");
+	STDOUT_PRINT(printf("test stack 1 has been destroyed\n"));
 
 	return NO_ERROR;
 }
@@ -70,11 +71,11 @@ static unsigned int test_print_data(const ssize_t stack_size)
 }
 
 
-static unsigned int test_increase_stack(const ssize_t stack_size, const size_t increase_coef)
+static unsigned int test_increase_stack(const ssize_t stack_size)
 {
 	start_test();
 
-	increase_stack(increase_coef, &stk);
+	increase_stack(&stk);
 
 	print_stack(&stk, stk.capacity);
 
@@ -84,13 +85,13 @@ static unsigned int test_increase_stack(const ssize_t stack_size, const size_t i
 }
 
 
-static unsigned int test_decrease_stack(const ssize_t stack_size, const size_t decrease_coef)
+static unsigned int test_decrease_stack(const ssize_t stack_size)
 {
 	start_test();
 
 	stk.size = 5;
 
-	decrease_stack(decrease_coef, &stk);
+	decrease_stack(&stk);
 
 	print_stack(&stk, stk.capacity);
 
@@ -104,47 +105,55 @@ static unsigned int test_alloc_data()
 {
 	ssize_t capacity = 5;
 
-	elem_t* data = init_data(capacity);
+	elem_t* data = init_stack_data(capacity);
 
 
 	#ifdef CANARY_PROTECTION
 
-		printf("left canary: %llu\n", *(get_left_canary_ptr(data)));
+		STDOUT_PRINT(printf("left canary: %llu\n", *(get_left_canary_ptr(data))));
 
-		printf("right canary: %llu\n", *(get_right_canary_ptr(data, capacity)));	
+		STDOUT_PRINT(printf("right canary: %llu\n", *(get_right_canary_ptr(data, capacity))));	
 
 	#endif /* CANARY_PROTECTION */
 
 	for (ssize_t n_elem = 0; n_elem < capacity; n_elem++)
 	{
-		printf("element %zu [%p]: %d\n", n_elem, data + n_elem, data[n_elem]);
+		STDOUT_PRINT(printf("element %zu [%p]: %d\n", n_elem, data + n_elem, data[n_elem]));
 	}
 
 	free_data(data);
 
-	printf("data is free\n");
-
+	STDOUT_PRINT(printf("data is free\n"));
 
 	return NO_ERROR;
 }
 
-static unsigned int test_print_stack_error(unsigned int max_error_code)
+
+static unsigned int test_print_stack_error()
 {
-	for (unsigned int error_code = 0; error_code < max_error_code; error_code++)
-	{
-		printf("error code: %u\n", error_code);
-		print_stack_error(error_code);
-	}
+	print_stack_error((1 << 13) - 1);
 
 	return NO_ERROR;
 }
 
+
+static unsigned int test_calc_hash_sum()
+{
+	const char* str = "abc";
+
+	size_t mem_str_size = sizeof(char) * 3;
+
+	hash_t test_hash = calc_hash_sum(str, mem_str_size);
+
+
+	printf(HASH_PRINTF_SPEC, test_hash);
+
+	return NO_ERROR;
+}
 
 
 int main(int argc, char* argv[])
 {
-	size_t test_number = 0;
-
 	for (size_t test_number = 1; test_number < argc; test_number++)
 	{
 		if       (strcmp(argv[test_number], "test_stack_1")          == 0)
@@ -161,11 +170,11 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(argv[test_number], "test_increase_stack")    == 0)
 		{
-			test_increase_stack(5, 2);
+			test_increase_stack(5);
 		}
 		else if (strcmp(argv[test_number], "test_decrease_stack")    == 0)
 		{
-			test_decrease_stack(7, 2);
+			test_decrease_stack(7);
 		}
 		else if (strcmp(argv[test_number], "test_print_data") 	     == 0)
 		{
@@ -173,11 +182,15 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(argv[test_number], "test_print_stack_error") == 0)
 		{
-			test_print_stack_error(10);
+			test_print_stack_error();
 		}
 		else if (strcmp(argv[test_number], "test_alloc_data")        == 0)
 		{
 			test_alloc_data();
+		}
+		else if (strcmp(argv[test_number], "test_calc_hash_sum")     == 0)
+		{
+			test_calc_hash_sum();
 		}
 	}
 }

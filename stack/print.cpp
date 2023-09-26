@@ -33,19 +33,19 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 
 	#ifdef HASH_PROTECTION
 
-		printf("\tstack  hash = %llu\n", stk_ptr->hash_stack);      // работает только с unsigned long long 
-		printf("\tdata   hash = %llu\n", stk_ptr->hash_data); // работает только с unsigned long long 
+		printf("\tstack  hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_stack);      
+		printf("\tdata   hash = " HASH_PRINTF_SPEC "\n", stk_ptr->hash_data); 
 
 	#endif /* HASH_PROTECTION */
 
 	#ifdef CANARY_PROTECTION
 
-		printf("\tstack canary left  = %llu\n", stk_ptr->left_canary);   //работает только с unsigned long long
-		printf("\tstack canary right = %llu\n", stk_ptr->right_canary);   //работает только с unsigned long long
+		printf("\tstack canary left  = " CANARY_PRINTF_SPEC "\n", stk_ptr->left_canary);   
+		printf("\tstack canary right = " CANARY_PRINTF_SPEC "\n", stk_ptr->right_canary);   
 
 	#endif /* CANARY_PROTECTION */ 
 
-	printf("\tlast popped value = %d\n", stk_ptr->last_popped_value); // работает только с int 
+	printf("\tlast popped value = " STACK_ELEM_PRINTF_SPEC "\n", stk_ptr->last_popped_value); 
 
 	unsigned int return_code = print_data(stk_ptr, print_poison_data_count);
 
@@ -53,7 +53,6 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 
 	return return_code;
 }
-
 
 
 unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_data_count)
@@ -76,8 +75,8 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 
 	#ifdef CANARY_PROTECTION
 
-		printf("\t\tleft canary:  %llu\n", *(get_left_canary_ptr(stk_ptr->data)));      						// работает только с unsigned long long
-		printf("\t\tright canary: %llu\n", *(get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity)));		// работает только с unsigned long long
+		printf("\t\tleft canary:  " CANARY_PRINTF_SPEC "\n", *(get_left_canary_ptr(stk_ptr->data)));      						
+		printf("\t\tright canary: " CANARY_PRINTF_SPEC "\n", *(get_right_canary_ptr(stk_ptr->data, stk_ptr->capacity)));		
 
 	#endif /* CANARY_PROTECTION */
 
@@ -96,11 +95,8 @@ unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_
 
 	for (ssize_t element_number = stk_ptr->size; element_number < (print_poison_data_count +  stk_ptr->size); element_number++)
 	{
-		#warning stack type specifier not hardcode
-		printf("\t\t [%zd] = %d\n", element_number, stk_ptr->data[element_number]);       // %d работает, если typedef int !!!!!!!!!!!!!!!!!!!!!!!
+		printf("\t\t [%zd] = " STACK_ELEM_PRINTF_SPEC "\n", element_number, stk_ptr->data[element_number]);       
 	}
-
-
 
 	printf("\t}\n");
 
@@ -112,11 +108,11 @@ unsigned int print_stack_error(const unsigned int error_code)
 {
 	if (error_code == NO_ERROR)
 	{
-		printf("NO ERROR\n");
+		PRINT_STACK_ERR("NO ERROR\n");
 		return error_code;
 	}
 
-	printf("errors:\n");
+	PRINT_STACK_ERR("errors:\n");
 
 	if ((error_code & STACK_POINTER_IS_NULL) 			 != 0) PRINT_STACK_ERR("stack pointer is NULL\n");
 

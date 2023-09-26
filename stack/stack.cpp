@@ -6,16 +6,16 @@
 #include "../include/canary.h"
 #include "../include/hash.h"
 
-#warning lag constant here and nafig this function
+const size_t increase_coef = 2;
+const size_t decrease_coef = 2;
 
-unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr)
+
+unsigned int increase_stack(struct Stack* const stk_ptr)
 {
 
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity * increase_coef);
-
-	stk_ptr->data = alloc_data(stk_ptr->capacity, stk_ptr->capacity * increase_coef, stk_ptr->data);
+	stk_ptr->data = alloc_stack_data(stk_ptr->capacity, stk_ptr->capacity * increase_coef, stk_ptr->data);
 
 	if (stk_ptr->data == NULL)
 	{
@@ -36,7 +36,7 @@ unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_
 }
 
 
-unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_ptr)
+unsigned int decrease_stack(struct Stack* const stk_ptr)
 {
 	if (stk_ptr->capacity / decrease_coef < stk_ptr->size)
 	{
@@ -47,9 +47,7 @@ unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_
 	
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	//stk_ptr->data = (elem_t*) realloc(stk_ptr->data, sizeof(elem_t) * stk_ptr->capacity / decrease_coef);
-
-	stk_ptr->data = alloc_data(stk_ptr->capacity, stk_ptr->capacity / decrease_coef, stk_ptr->data);
+	stk_ptr->data = alloc_stack_data(stk_ptr->capacity, stk_ptr->capacity / decrease_coef, stk_ptr->data);
 
 	if ((stk_ptr->data) == NULL)
 	{
@@ -67,7 +65,7 @@ unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_
 
 unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 {
-	const size_t increase_coef = 2;
+
 
 	unsigned int return_code = stack_verificator(stk_ptr);
 
@@ -82,7 +80,7 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 
 	if (stk_ptr->size == stk_ptr->capacity)
 	{
-		return_code |= increase_stack(increase_coef, stk_ptr);
+		return_code |= increase_stack(stk_ptr);
 
 		if (return_code != NO_ERROR)
 		{
@@ -96,14 +94,19 @@ unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value)
 
 	stk_ptr->size++;
 
+	#ifdef HASH_PROTECTION
+
+		stk_ptr->hash_stack = calc_hash_stack(*stk_ptr);
+		stk_ptr->hash_data = calc_hash_stack_data(stk_ptr);
+
+	#endif /* HASH_PROTECTION */
+
 	return NO_ERROR;
 }
 
 
 unsigned int stack_pop(struct Stack* const stk_ptr)
 {
-	const size_t decrease_coef = 2;
-
 	unsigned int return_code = stack_verificator(stk_ptr);
 
 	if (return_code != 0)
@@ -127,10 +130,10 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 	printf("stack size is %zd\n", stk_ptr->size);
 	printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag);
 
-	#warning lag works wrong way
-	if ((stk_ptr->capacity - get_stack_decrease_lag(stk_ptr->capacity)) > stk_ptr->size)
+
+	if (get_stack_decrease_lag(stk_ptr->capacity) > stk_ptr->size)
 	{
-		return_code |= decrease_stack(decrease_coef, stk_ptr);
+		return_code |= decrease_stack(stk_ptr);
 
 		if (return_code != NO_ERROR)
 		{
@@ -143,6 +146,14 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 	stk_ptr->data[stk_ptr->size - 1] = POISON_VALUE;
 
 	stk_ptr->size--;
+
+
+	#ifdef HASH_PROTECTION
+
+		stk_ptr->hash_stack = calc_hash_stack(*stk_ptr);
+		stk_ptr->hash_data = calc_hash_stack_data(stk_ptr);
+
+	#endif /* HASH_PROTECTION */
 
 	return return_code;
 }
@@ -160,6 +171,12 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	stk_ptr->capacity = start_size;
 
+	stk_ptr->capacity = start_size;
+
+	stk_ptr->last_popped_value = POISON_VALUE;
+
+	stk_ptr->size = 0;
+
 	#ifdef CANARY_PROTECTION
 
 		stk_ptr->left_canary = CANARY_LEFT_CONSTANT;
@@ -168,24 +185,25 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	#endif /* CANARY_PROTECTION */
 
-	#ifdef HASH_PROTECTION
+	stk_ptr->data = init_stack_data(stk_ptr->capacity);
 
+	if ((stk_ptr->data) == NULL)
+	{
+		return STACK_DATA_IS_NULL;
+	}
+
+
+	#ifdef HASH_PROTECTION
 
 		stk_ptr->hash_stack =  calc_hash_stack(*stk_ptr);
 
-		stk_ptr->hash_data  =  calc_hash_data(*stk_ptr);
+		stk_ptr->hash_data  =  calc_hash_stack_data(stk_ptr);
 
 	#endif /* HASH_PROTECTION */
 
-	stk_ptr->capacity = start_size;
 
-	stk_ptr->last_popped_value = POISON_VALUE;
 
-	stk_ptr->data = init_data(stk_ptr->capacity);
-
-	printf("calloc data\n");
-
-	stk_ptr->size = 0;
+	STDOUT_PRINT(printf("calloc data\n"));
 
 	get_stack_init_info();
 
@@ -198,18 +216,17 @@ enum error_code stack_dtor(struct Stack* stk_ptr)
 	stk_ptr->capacity = -1;
 	stk_ptr->size = -1;
 
-	#warning do not always pooop in user's console
-	printf("nulled size and capacity\n");
+	STDOUT_PRINT(printf("nulled size and capacity\n"));
 
 	free_data(stk_ptr->data);
 
 	stk_ptr->data = 0;
 
-	printf("nulled and free data\n");
+	STDOUT_PRINT(printf("nulled and free data\n"));
 
 	stk_ptr = 0;
 
-	printf("nulled stack pointer\n");
+	STDOUT_PRINT(printf("nulled stack pointer\n"));
 
 	return NO_ERROR;
 }
@@ -219,7 +236,7 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 {
 	unsigned int return_code = 0;
 
-	printf("start checking stack\n");
+	STDOUT_PRINT(printf("start checking stack\n"));
 
 	if (stk_ptr == NULL)
 	{
@@ -251,9 +268,9 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 
 	#ifdef HASH_PROTECTION
 
-		if (stk_ptr->hash_stack != calc_hash_stack(*stk_ptr))  return_code |= STACK_HASH_IS_WRONG;
+		if (stk_ptr->hash_stack != calc_hash_stack(*stk_ptr))  		return_code |= STACK_HASH_IS_WRONG;
 
-		if (stk_ptr->hash_data  != calc_hash_data(*stk_ptr))   return_code |= DATA_HASH_IS_WRONG;
+		if (stk_ptr->hash_data  != calc_hash_stack_data(stk_ptr))   return_code |= DATA_HASH_IS_WRONG;
 
 	#endif /* HASH_PROTECTION */
 
@@ -263,9 +280,5 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 
 ssize_t get_stack_decrease_lag(const ssize_t capacity)
 {
-	const ssize_t lag_constant = 2;
-
-	assert(lag_constant > 0);
-
-	return capacity / lag_constant;
+	return capacity / (increase_coef * decrease_coef);
 }

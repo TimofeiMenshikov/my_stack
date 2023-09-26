@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "../include/canary.h"
 #include "../include/stack.h"
+#include "../include/print.h"
 
 
 #ifdef CANARY_PROTECTION
@@ -36,43 +37,50 @@ unsigned int free_data(elem_t* data)
 }
 
 
-elem_t* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data)
+elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data)
 {
+
+
 	#ifdef CANARY_PROTECTION
 		
 		size_t n_bytes = new_capacity * sizeof(elem_t) + 2 * sizeof(canary_t);
 
-		printf("%zu bytes to calloc\n", n_bytes);
+		STDOUT_PRINT(printf("%zu bytes to calloc\n", n_bytes));
 
-
-		if (data == 0)
-		{
-			
-			data = (elem_t*)calloc(n_bytes, sizeof(char));
+		
+		if (data == NULL)  // проверка существует кусок памяти с массивом или нет
+		{			
+			data = (elem_t*)malloc(n_bytes);
+			STDOUT_PRINT(printf("data after calloc:  [%p]\n", data));
 		}
 		else
 		{
 			data = (elem_t*)realloc(get_left_canary_ptr(data), n_bytes * sizeof(char));
+
+			STDOUT_PRINT(printf("data after realloc:  [%p]\n", data));
 		}
 
-		printf("calloc data\n");
-		assert(data);
+		if (data == NULL)  // проверка, удачно ли произошла аллокация памяти
+		{
+			PRINT_STACK_ERR("unable to alloc_data\n");
+			return NULL;
+		}
 
-		printf("data after calloc:  [%p]\n", data);
+		assert(data);
 
 		data = (elem_t*)((canary_t*)data + 1);
 
-		printf("data after offset   [%p]\n", data);
+		STDOUT_PRINT(printf("data after offset   [%p]\n", data));
 
 		canary_t* canary_left_ptr = get_left_canary_ptr(data);
 
-		printf("canary_left_ptr is  [%p]\n", canary_left_ptr);
+		STDOUT_PRINT(printf("canary_left_ptr is  [%p]\n", canary_left_ptr));
 
 		*canary_left_ptr = CANARY_LEFT_CONSTANT;
 
 		canary_t* canary_right_ptr = get_right_canary_ptr(data, new_capacity);
 
-		printf("canary_right_ptr is [%p]\n", canary_right_ptr);
+		STDOUT_PRINT(printf("canary_right_ptr is [%p]\n", canary_right_ptr));
 
 		*canary_right_ptr = CANARY_RIGHT_CONSTANT;
 	
@@ -80,9 +88,24 @@ elem_t* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_
 
 		size_t n_bytes = new_capacity * sizeof(elem_t);
 
-		printf("%zu bytes to calloc\n", n_bytes);
+		STDOUT_PRINT(("%zu bytes to calloc\n", n_bytes));
 
-		data = (elem_t*) realloc(data, n_bytes);
+		if (data == NULL) // проверка существует кусок памяти с массивом или нет
+		{
+			data = (elem_t*) malloc(n_bytes);
+		} 
+		else
+		{
+			data = (elem_t*) realloc(data, n_bytes);  
+		}
+
+
+		if (data == NULL) // проверка, удачно ли произошла аллокация памяти
+		{
+			PRINT_STACK_ERR("unable to alloc_data\n");
+			return NULL;
+		}
+
 
 		assert(data);
 
@@ -97,10 +120,18 @@ elem_t* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_
 }
 
 
-#warning init_data is too generic name. Stack should not depend on canaries with them off
-elem_t* init_data(const ssize_t capacity)
+elem_t* init_stack_data(const ssize_t capacity)
 {
 	elem_t* data = NULL;
 
-	return alloc_data(0, capacity, data);
+	data = alloc_stack_data(0, capacity, data);
+
+	if (data == NULL)
+	{
+		PRINT_STACK_ERR("unable to init stack");
+	}
+
+	return data;
 }
+
+

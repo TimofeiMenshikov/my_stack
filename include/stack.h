@@ -2,9 +2,11 @@
 #define STACK_H
 
 typedef int elem_t;
-#define STACK_PRINTF_SPEC "%d"
+#define STACK_ELEM_PRINTF_SPEC "%d"
+#define CANARY_PRINTF_SPEC "%llu"
+#define HASH_PRINTF_SPEC "%lld"
 typedef unsigned long long canary_t;
-typedef unsigned long long hash_t;
+typedef long long hash_t;
 
 const elem_t POISON_VALUE = 0;
 
@@ -23,30 +25,28 @@ const elem_t POISON_VALUE = 0;
 
 enum error_code
 {
-	#warning dechimal bad (1 << 2) 0x04
-
 	NO_ERROR = 0,
-	STACK_POINTER_IS_NULL = 1,
-	STACK_DATA_IS_NULL = 2,
-	INVALID_STACK_SIZE = 4,
-	INVALID_STACK_CAPACITY = 8,
-	STACK_SIZE_LARGER_THAN_CAPACITY = 16,
-	UNABLE_TO_INCREASE_STACK = 32,
-	UNABLE_TO_DECREASE_STACK = 64
+	STACK_POINTER_IS_NULL 			= 1 << 0,
+	STACK_DATA_IS_NULL 				= 1 << 1,
+	INVALID_STACK_SIZE 				= 1 << 2,
+	INVALID_STACK_CAPACITY          = 1 << 3,
+	STACK_SIZE_LARGER_THAN_CAPACITY = 1 << 4,
+	UNABLE_TO_INCREASE_STACK 		= 1 << 5,
+	UNABLE_TO_DECREASE_STACK 		= 1 << 6
 
 	#ifdef CANARY_PROTECTION
 	,
-	LEFT_CANARY_DATA_DIED = 128,
-	RIGHT_CANARY_DATA_DIED = 256,
-	LEFT_CANARY_STACK_DIED = 512,
-	RIGHT_CANARY_STACK_DIED = 1024
+	LEFT_CANARY_DATA_DIED 			= 1 << 7,
+	RIGHT_CANARY_DATA_DIED 			= 1 << 8,
+	LEFT_CANARY_STACK_DIED 			= 1 << 9,
+	RIGHT_CANARY_STACK_DIED 		= 1 << 10
 
 	#endif /* CANARY_PROTECTION */
 
 	#ifdef HASH_PROTECTION
 	,
-	STACK_HASH_IS_WRONG = 2048,
-	DATA_HASH_IS_WRONG = 4096
+	STACK_HASH_IS_WRONG 			= 1 << 11,
+	DATA_HASH_IS_WRONG 				= 1 << 12
 
 	#endif /* HASH_PROTECTION */
 };
@@ -90,9 +90,9 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr);
 
 enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size);
 
-unsigned int increase_stack(const size_t increase_coef, struct Stack* const stk_ptr);
+unsigned int increase_stack(struct Stack* const stk_ptr);
 
-unsigned int decrease_stack(const size_t decrease_coef, struct Stack* const stk_ptr);
+unsigned int decrease_stack(struct Stack* const stk_ptr);
 
 unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value);
 

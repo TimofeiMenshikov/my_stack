@@ -1,76 +1,54 @@
 #include <stdio.h>
 #include "../include/stack.h"
 #include "../include/hash.h"
+#include "../include/canary.h"
 
 
 #ifdef HASH_PROTECTION
 	hash_t calc_hash_stack(struct Stack stk)
 	{
-		// изменяет данные при расчете хеша => передача не по указателю
-		/*
-		hash_t bytes_sum = 0;
+		stk.hash_stack = 0;
 
-		CALC_HASH_SUM(stk.capacity);
+		hash_t hash_stack = calc_hash_sum(&stk, 8);
 
-		size_t data_address_number = (size_t) stk.data; 
+		HASH_DUMP(("sizeof stk: %zu \n", sizeof(stk))); 
+		HASH_DUMP(("hash stack is " HASH_PRINTF_SPEC "\n", hash_stack));
 
-		CALC_HASH_SUM(data_address_number);
-		CALC_HASH_SUM(stk.size);
-		CALC_HASH_SUM(stk.capacity);
-		CALC_HASH_SUM(stk.last_popped_value);
-		CALC_HASH_SUM(stk.stk_info.call_line);
+		return hash_stack;
+	}
 
-		size_t call_line_address_number = (size_t) stk.stk_info.call_file;
-		size_t call_file_address_number = (size_t) stk.stk_info.call_func;
+	hash_t calc_hash_sum(const void* mem_block, const size_t mem_size)
+	{
+		const char* mem_str = (char*) mem_block;
 
-		CALC_HASH_SUM(call_line_address_number);
-		CALC_HASH_SUM(call_file_address_number);
+		hash_t mem_sum = 0;
 
-		CALC_HASH_SUM(stk.stk_info.init_line);
+		for (size_t mem_char_number = 0; mem_char_number < mem_size; mem_char_number++)
+		{
+			//printf("%d(%c)\n", mem_str[mem_char_number], mem_str[mem_char_number]);
+			mem_sum += mem_str[mem_char_number] * (mem_char_number + 1);
+		}
 
-		size_t init_line_address_number = (size_t) stk.stk_info.init_file;
-		size_t init_file_address_number = (size_t) stk.stk_info.init_func;
-
-		CALC_HASH_SUM(init_line_address_number);
-		CALC_HASH_SUM(init_file_address_number);
-
-		#ifdef CANARY_PROTECTION
-
-			CALC_HASH_SUM(stk.left_canary);
-			CALC_HASH_SUM(stk.right_canary);
-
-		*/
-
-		//#endif /* CANARY_PROTECTION */
-
-		//return bytes_sum;
-
-		return 0;
+		return mem_sum;
 	}
 
 	
-	#warning do not use such generic name
-	hash_t calc_hash_data(struct Stack stk)
+	hash_t calc_hash_stack_data(const struct Stack* const stk_ptr)
 	{
-		hash_t bytes_sum = 0;
+		#ifdef    CANARY_PROTECTION
 
-		return bytes_sum;
+			hash_t hash_data = calc_hash_sum(get_left_canary_ptr(stk_ptr->data), stk_ptr->capacity * sizeof(elem_t) + 2 * sizeof(canary_t));
+
+		#else  /* CANARY_PROTECTION */
+
+			hash_t hash_data = calc_hash_sum(stk_ptr->data, stk_ptr->capacity * sizeof(elem_t));
+
+		#endif /* CANARY_PROTECTION */
+
+		HASH_DUMP(printf("hash data is " HASH_PRINTF_SPEC "\n", hash_data));
+
+		return hash_data;
 	}
-	/*
-		printf("start for\n");
-
-		for (size_t n_elem = 0; n_elem < stk.capacity; n_elem++)
-		{
-			printf("the number is %d", stk.data[n_elem]);
-
-			CALC_HASH_SUM(stk.data[n_elem]);
-			printf("calc %zu\n", n_elem);
-		}
-
-		return bytes_sum;
-	}*/
-
-
 
 
 #endif /* HASH_PROTECTION */

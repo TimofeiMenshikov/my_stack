@@ -16,9 +16,9 @@
 
 	#endif /* CANARY_PROTECTION */
 
-	elem_t* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data);
+	elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data);
 
-	elem_t* init_data(const ssize_t capacity);
+	elem_t* init_stack_data(const ssize_t capacity);
 	unsigned int free_data(elem_t* data);
 
 #endif /* CANARY_H */		

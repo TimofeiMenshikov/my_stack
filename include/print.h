@@ -1,7 +1,6 @@
 #ifndef PRINT_H
 #define PRINT_H
 
-
 #include "stack.h"
 
 #ifdef STACK_DUMP
@@ -11,11 +10,18 @@
 #endif /* STACK_DUMP */
 
 #ifdef STDOUT_DUMP
-	#define STDOUT_PRINT(text) printf("%s\n", text);
-#else /* STDOUT_DUMP */
-	#define STDOUT_PRINT(text) 
-#endif /* STDOUT_DUMP */
+    #define STDOUT_PRINT(function)  \
+        do                          \
+        {                           \
+            function;               \
+        }                           \
+        while(0);
 
+#else /* STDOUT_DUMP */
+
+    #define STDOUT_PRINT(function)
+
+#endif /* STDOUT_DUMP */ 
 
 unsigned int print_stack(const struct Stack* const stk_ptr, ssize_t print_data_count);
 

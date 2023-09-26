@@ -21,8 +21,14 @@ endif
 
 
 CANARY_PROTECTION = True
-HASH_PROTECTION = True
-STACK_DUMP = True
+HASH_PROTECTION   = True
+STACK_DUMP 		  = True
+STDOUT_DUMP 	  = True
+HASH_DEBUG 		  = True
+
+ifeq ($(HASH_DEBUG), True)
+	CXXFLAGS += -DHASH_DEBUG
+endif
 
 ifeq ($(CANARY_PROTECTION), True)
 	CXXFLAGS += -DCANARY_PROTECTION
@@ -34,6 +40,10 @@ endif
 
 ifeq ($(STACK_DUMP), True)
 	CXXFLAGS += -DSTACK_DUMP
+endif
+
+ifeq ($(STDOUT_DUMP), True)
+	CXXFLAGS += -DSTDOUT_DUMP
 endif
 
 all: main.exe
