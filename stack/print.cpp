@@ -27,7 +27,6 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 	
 	printf("\t}\n");
 
-
 	printf("\tsize     = %zd\n", stk_ptr->size);
 	printf("\tcapacity = %zd\n", stk_ptr->capacity);
 
@@ -58,7 +57,6 @@ unsigned int print_stack(const Stack* const stk_ptr, ssize_t print_poison_data_c
 unsigned int print_data(const struct Stack* const stk_ptr, ssize_t print_poison_data_count)
 {
 	unsigned int return_code = stack_verificator(stk_ptr);
-
 
 	if (return_code != 0)
 	{

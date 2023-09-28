@@ -7,12 +7,21 @@
 #ifdef HASH_PROTECTION
 	hash_t calc_hash_stack(struct Stack stk)
 	{
+
+		#ifdef a349282kflacXX
+
+		hash_t hash_stack = (hash_t)stk.size; 
+
+		#else
+
 		stk.hash_stack = 0;
 
 		hash_t hash_stack = calc_hash_sum(&stk, 8);
 
 		HASH_DUMP(("sizeof stk: %zu \n", sizeof(stk))); 
 		HASH_DUMP(("hash stack is " HASH_PRINTF_SPEC "\n", hash_stack));
+
+		#endif 
 
 		return hash_stack;
 	}

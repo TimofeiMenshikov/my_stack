@@ -67,6 +67,10 @@ static unsigned int test_print_data(const ssize_t stack_size)
 
 	stack_dtor(&stk);
 
+	char* ptr;
+
+	printf(STACK_ELEM_PRINTF_SPEC, *(char*)*ptr);
+
 	return NO_ERROR;
 }
 

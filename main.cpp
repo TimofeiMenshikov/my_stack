@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include "include/stack.h"
 #include "include/print.h"
-#include "include/test.h"
+
 
 const ssize_t stack_size = 10;
 
@@ -15,11 +15,15 @@ int main()
 
 	stack_init(&stk, stack_size);
 
+	char* ptr;
+
+	printf(STACK_ELEM_PRINTF_SPEC, *(char*)*ptr);
+
 	STDOUT_PRINT(printf("stack has been init\n"));
 
 	unsigned int error_code = stack_verificator(&stk);
 
-	print_error(error_code);
+	print_stack_error(error_code);
 
 	print_stack(&stk, stack_size);
 
