@@ -9,8 +9,11 @@
 const size_t increase_coef = 2;
 const size_t decrease_coef = 2;
 
+static unsigned int increase_stack(struct Stack* const stk_ptr);
+static unsigned int decrease_stack(struct Stack* const stk_ptr);
 
-unsigned int increase_stack(struct Stack* const stk_ptr)
+
+static unsigned int increase_stack(struct Stack* const stk_ptr) 
 {
 
 	elem_t* old_data_ptr = stk_ptr->data;
@@ -36,7 +39,7 @@ unsigned int increase_stack(struct Stack* const stk_ptr)
 }
 
 
-unsigned int decrease_stack(struct Stack* const stk_ptr)
+static unsigned int decrease_stack(struct Stack* const stk_ptr)
 {
 	if (stk_ptr->capacity / decrease_coef < stk_ptr->size)
 	{
@@ -125,13 +128,12 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 		return INVALID_STACK_SIZE;
 	}
 
-	ssize_t stack_decrease_lag = get_stack_decrease_lag(stk_ptr->capacity);
+	ssize_t stack_decrease_lag = stk_ptr->capacity / (increase_coef * decrease_coef); 
 
-	printf("stack size is %zd\n", stk_ptr->size);
-	printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag);
+	STDOUT_PRINT(printf("stack size is %zd\n", stk_ptr->size));
+	STDOUT_PRINT(printf("stack capacity is %zd, stack lag is %zd\n", stk_ptr->capacity, stack_decrease_lag));
 
-
-	if (get_stack_decrease_lag(stk_ptr->capacity) > stk_ptr->size)
+	if (stk_ptr->capacity / (increase_coef * decrease_coef) > stk_ptr->size) 
 	{
 		return_code |= decrease_stack(stk_ptr);
 
@@ -161,15 +163,12 @@ unsigned int stack_pop(struct Stack* const stk_ptr)
 
 enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size)
 {
-
-	printf("start stack init\n");
+	STDOUT_PRINT(printf("start stack init\n"));
 
 	if (start_size < 0)
 	{
 		return INVALID_STACK_CAPACITY;
 	}
-
-	stk_ptr->capacity = start_size;
 
 	stk_ptr->capacity = start_size;
 
@@ -205,7 +204,8 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	STDOUT_PRINT(printf("calloc data\n"));
 
-	get_stack_init_info();
+
+	GET_STACK_INIT_INFO(); 
 
 	return NO_ERROR;
 }
@@ -218,7 +218,7 @@ enum error_code stack_dtor(struct Stack* stk_ptr)
 
 	STDOUT_PRINT(printf("nulled size and capacity\n"));
 
-	free_data(stk_ptr->data);
+	free_stack_data(stk_ptr->data);
 
 	stk_ptr->data = 0;
 
@@ -277,8 +277,3 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr)
 	return return_code;
 }
 
-
-ssize_t get_stack_decrease_lag(const ssize_t capacity)
-{
-	return capacity / (increase_coef * decrease_coef);
-}

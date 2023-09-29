@@ -11,13 +11,13 @@ typedef long long hash_t;
 const elem_t POISON_VALUE = 0;
 
 // define работает со стеком
-#define get_stack_call_info()          \
+#define GET_STACK_CALL_INFO()          \
 	stk.stk_info.call_line = __LINE__; \
 	stk.stk_info.call_func = __func__; \
 	stk.stk_info.call_file = __FILE__;
 
 // define работает с указателем на стек
-#define get_stack_init_info()               \
+#define GET_STACK_INIT_INFO()               \
 	stk_ptr->stk_info.init_line = __LINE__; \
 	stk_ptr->stk_info.init_func = __func__; \
 	stk_ptr->stk_info.init_file = __FILE__;
@@ -90,18 +90,11 @@ unsigned int stack_verificator(const struct Stack* const stk_ptr);
 
 enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size);
 
-unsigned int increase_stack(struct Stack* const stk_ptr);
-
-unsigned int decrease_stack(struct Stack* const stk_ptr);
-
 unsigned int stack_push(struct Stack* const stk_ptr, const elem_t value);
 
 enum error_code stack_dtor(struct Stack* stk_ptr);
 
 unsigned int stack_pop(struct Stack* stk_ptr);
-
-ssize_t get_stack_decrease_lag(const ssize_t capacity);
-
 
 #endif /* STACK_H */
 

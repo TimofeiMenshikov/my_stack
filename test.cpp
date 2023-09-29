@@ -10,7 +10,7 @@
 #define start_test()         								   \
 	struct Stack stk;       								   \
 															   \
-	get_stack_call_info();  								   \
+	GET_STACK_CALL_INFO();  								   \
 															   \
 	enum error_code init_code =  stack_init(&stk, stack_size); \
 															   \
@@ -75,36 +75,6 @@ static unsigned int test_print_data(const ssize_t stack_size)
 }
 
 
-static unsigned int test_increase_stack(const ssize_t stack_size)
-{
-	start_test();
-
-	increase_stack(&stk);
-
-	print_stack(&stk, stk.capacity);
-
-	stack_dtor(&stk);
-
-	return NO_ERROR;
-}
-
-
-static unsigned int test_decrease_stack(const ssize_t stack_size)
-{
-	start_test();
-
-	stk.size = 5;
-
-	decrease_stack(&stk);
-
-	print_stack(&stk, stk.capacity);
-
-	stack_dtor(&stk);
-
-	return NO_ERROR;
-} 
-
-
 static unsigned int test_alloc_data()
 {
 	ssize_t capacity = 5;
@@ -125,7 +95,7 @@ static unsigned int test_alloc_data()
 		STDOUT_PRINT(printf("element %zu [%p]: %d\n", n_elem, data + n_elem, data[n_elem]));
 	}
 
-	free_data(data);
+	free_stack_data(data);
 
 	STDOUT_PRINT(printf("data is free\n"));
 
@@ -171,14 +141,6 @@ int main(int argc, char* argv[])
 		else if (strcmp(argv[test_number], "test_stack_3") 		     == 0)
 		{
 			test_stack(-1);
-		}
-		else if (strcmp(argv[test_number], "test_increase_stack")    == 0)
-		{
-			test_increase_stack(5);
-		}
-		else if (strcmp(argv[test_number], "test_decrease_stack")    == 0)
-		{
-			test_decrease_stack(7);
 		}
 		else if (strcmp(argv[test_number], "test_print_data") 	     == 0)
 		{

@@ -3,7 +3,7 @@ CXX = g++
 
 TEST = True
 
-TEST_NAME = test_print_stack
+TEST_NAME = test_stack_1
 
 OBJDIR = object_files
 STKDIR = stack

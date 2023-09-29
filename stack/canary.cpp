@@ -23,7 +23,7 @@
 #endif /* CANARY_PROTECTION */
 
 
-unsigned int free_data(elem_t* data)
+unsigned int free_stack_data(elem_t* data)
 {
 	#ifdef CANARY_PROTECTION
 		free(get_left_canary_ptr(data));
@@ -36,7 +36,7 @@ unsigned int free_data(elem_t* data)
 	return NO_ERROR;
 }
 
-
+#warning maybe make it more general
 elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data)
 {
 
@@ -54,7 +54,7 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 		}
 		else
 		{
-			data = (elem_t*)realloc(get_left_canary_ptr(data), n_bytes * sizeof(char));
+			data = (elem_t*)realloc(get_left_canary_ptr(data), n_bytes);
 
 			STDOUT_PRINT(printf("data after realloc:  [%p]\n", data));
 		}
@@ -104,7 +104,6 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 			PRINT_STACK_ERR("unable to alloc_data\n");
 			return NULL;
 		}
-
 
 		assert(data);
 

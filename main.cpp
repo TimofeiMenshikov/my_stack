@@ -3,21 +3,17 @@
 #include "include/stack.h"
 #include "include/print.h"
 
-
 const ssize_t stack_size = 10;
-
 
 int main()
 {
 	struct Stack stk;
 
-	get_stack_call_info(); 
+	GET_STACK_CALL_INFO(); 
 
 	stack_init(&stk, stack_size);
 
-	char* ptr;
 
-	printf(STACK_ELEM_PRINTF_SPEC, *(char*)*ptr);
 
 	STDOUT_PRINT(printf("stack has been init\n"));
 
