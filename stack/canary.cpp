@@ -8,13 +8,13 @@
 
 #ifdef CANARY_PROTECTION
 
-	canary_t* get_left_canary_ptr(elem_t* const data)
+	canary_t* get_left_canary_ptr(void* const data)
 	{
 		canary_t* const canary_left_ptr = (canary_t*)data - 1;
 		return canary_left_ptr;
 	}
 
-	canary_t* get_right_canary_ptr(elem_t* const data, ssize_t capacity)
+	canary_t* get_right_canary_ptr(void* const data, ssize_t capacity)
 	{
 		canary_t* const canary_right_ptr = (canary_t*)((elem_t*)data + capacity);
 		return canary_right_ptr;
@@ -36,8 +36,8 @@ unsigned int free_stack_data(elem_t* data)
 	return NO_ERROR;
 }
 
-#warning maybe make it more general
-elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity, elem_t* data)
+
+void* alloc_data(const ssize_t old_capacity, const ssize_t new_capacity, void* data)
 {
 
 
@@ -49,12 +49,12 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 		
 		if (data == NULL)  // проверка существует кусок памяти с массивом или нет
 		{			
-			data = (elem_t*)malloc(n_bytes);
+			data = (void*)malloc(n_bytes);
 			STDOUT_PRINT(printf("data after calloc:  [%p]\n", data));
 		}
 		else
 		{
-			data = (elem_t*)realloc(get_left_canary_ptr(data), n_bytes);
+			data = (void*)realloc(get_left_canary_ptr(data), n_bytes);
 
 			STDOUT_PRINT(printf("data after realloc:  [%p]\n", data));
 		}
@@ -67,7 +67,7 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 
 		assert(data);
 
-		data = (elem_t*)((canary_t*)data + 1);
+		data = (void*)((canary_t*)data + 1);
 
 		STDOUT_PRINT(printf("data after offset   [%p]\n", data));
 
@@ -91,11 +91,11 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 
 		if (data == NULL) // проверка существует кусок памяти с массивом или нет
 		{
-			data = (elem_t*) malloc(n_bytes);
+			data = (void*) malloc(n_bytes);
 		} 
 		else
 		{
-			data = (elem_t*) realloc(data, n_bytes);  
+			data = (void*) realloc(data, n_bytes);  
 		}
 
 
@@ -111,18 +111,18 @@ elem_t* alloc_stack_data(const ssize_t old_capacity, const ssize_t new_capacity,
 
 	for (ssize_t n_elem = old_capacity; n_elem < new_capacity; n_elem++)
 	{
-		data[n_elem] = POISON_VALUE;
+		*((elem_t*)data + n_elem) = POISON_VALUE;
 	}
 
 	return data;	
 }
 
 
-elem_t* init_stack_data(const ssize_t capacity)
+void* init_data(const ssize_t capacity)
 {
 	elem_t* data = NULL;
 
-	data = alloc_stack_data(0, capacity, data);
+	data = (elem_t*)alloc_data(0, capacity, data);
 
 	if (data == NULL)
 	{

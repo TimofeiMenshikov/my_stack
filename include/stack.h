@@ -11,16 +11,25 @@ typedef long long hash_t;
 const elem_t POISON_VALUE = 0;
 
 // define работает со стеком
-#define GET_STACK_CALL_INFO()          \
-	stk.stk_info.call_line = __LINE__; \
-	stk.stk_info.call_func = __func__; \
-	stk.stk_info.call_file = __FILE__;
+#define GET_STACK_CALL_INFO()               \
+	do                                      \
+	{										\
+		stk.stk_info.call_line = __LINE__;  \
+		stk.stk_info.call_func = __func__;  \
+		stk.stk_info.call_file = __FILE__;	\
+	} 										\
+	while (false); 				
+
 
 // define работает с указателем на стек
-#define GET_STACK_INIT_INFO()               \
+#define GET_STACK_INIT_INFO()				\
+    do     									\
+    {    									\
 	stk_ptr->stk_info.init_line = __LINE__; \
 	stk_ptr->stk_info.init_func = __func__; \
-	stk_ptr->stk_info.init_file = __FILE__;
+	stk_ptr->stk_info.init_file = __FILE__; \
+	}										\
+	while (false);							
 
 
 enum error_code

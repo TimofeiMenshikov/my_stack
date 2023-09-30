@@ -67,10 +67,6 @@ static unsigned int test_print_data(const ssize_t stack_size)
 
 	stack_dtor(&stk);
 
-	char* ptr;
-
-	printf(STACK_ELEM_PRINTF_SPEC, *(char*)*ptr);
-
 	return NO_ERROR;
 }
 
@@ -79,7 +75,7 @@ static unsigned int test_alloc_data()
 {
 	ssize_t capacity = 5;
 
-	elem_t* data = init_stack_data(capacity);
+	elem_t* data = (elem_t*)init_data(capacity);
 
 
 	#ifdef CANARY_PROTECTION
@@ -128,7 +124,7 @@ static unsigned int test_calc_hash_sum()
 
 int main(int argc, char* argv[])
 {
-	for (size_t test_number = 1; test_number < argc; test_number++)
+	for (int test_number = 1; test_number < argc; test_number++)
 	{
 		if       (strcmp(argv[test_number], "test_stack_1")          == 0)
 		{

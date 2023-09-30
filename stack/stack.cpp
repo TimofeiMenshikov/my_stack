@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <assert.h>
+
 #include "../include/stack.h"
 #include "../include/print.h"
 #include "../include/canary.h"
 #include "../include/hash.h"
 
-const size_t increase_coef = 2;
-const size_t decrease_coef = 2;
+
+const ssize_t increase_coef = 2;
+const ssize_t decrease_coef = 2;
 
 static unsigned int increase_stack(struct Stack* const stk_ptr);
 static unsigned int decrease_stack(struct Stack* const stk_ptr);
@@ -18,7 +20,7 @@ static unsigned int increase_stack(struct Stack* const stk_ptr)
 
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	stk_ptr->data = alloc_stack_data(stk_ptr->capacity, stk_ptr->capacity * increase_coef, stk_ptr->data);
+	stk_ptr->data = (elem_t*)alloc_data(stk_ptr->capacity, stk_ptr->capacity * increase_coef, stk_ptr->data);
 
 	if (stk_ptr->data == NULL)
 	{
@@ -50,7 +52,7 @@ static unsigned int decrease_stack(struct Stack* const stk_ptr)
 	
 	elem_t* old_data_ptr = stk_ptr->data;
 
-	stk_ptr->data = alloc_stack_data(stk_ptr->capacity, stk_ptr->capacity / decrease_coef, stk_ptr->data);
+	stk_ptr->data = (elem_t*)alloc_data(stk_ptr->capacity, stk_ptr->capacity / decrease_coef, stk_ptr->data);
 
 	if ((stk_ptr->data) == NULL)
 	{
@@ -184,7 +186,7 @@ enum error_code stack_init(struct Stack* const stk_ptr, const ssize_t start_size
 
 	#endif /* CANARY_PROTECTION */
 
-	stk_ptr->data = init_stack_data(stk_ptr->capacity);
+	stk_ptr->data = (elem_t*) init_data(stk_ptr->capacity);
 
 	if ((stk_ptr->data) == NULL)
 	{

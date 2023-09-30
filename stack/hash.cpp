@@ -18,8 +18,8 @@
 
 		hash_t hash_stack = calc_hash_sum(&stk, 8);
 
-		HASH_DUMP(("sizeof stk: %zu \n", sizeof(stk))); 
-		HASH_DUMP(("hash stack is " HASH_PRINTF_SPEC "\n", hash_stack));
+		HASH_DUMP(printf("sizeof stk: %zu \n", sizeof(stk))); 
+		HASH_DUMP(printf("hash stack is " HASH_PRINTF_SPEC "\n", hash_stack));
 
 		#endif 
 
